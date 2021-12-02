@@ -21,28 +21,21 @@ import tensorflow as tf
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", required=True, help="model to train")
 ap.add_argument("-t", "--train_dir", required=True, help="train_directory")
-#ap.add_argument("-v","--val_dir",required=True,help="val_directory")
 ap.add_argument("-c", "--num_classes", required=True, help="number of class")
 ap.add_argument("-G", "--GPU", required=True, help="number of gpus")
-#ap.add_argument("-I", "--model_input_size", required=True, help="model_input_size like (227, 227)")
 ap.add_argument("-b", "--train_batch_size", required=True, help="batch_size to train")
 ap.add_argument("-e", "--epochs", required=True, help="number of epochs")
 ap.add_argument("-s", "--input_size", required=True, help="input size to model")
-ap.add_argument("-o","--output_checkpoint_folder",required=True,help="Folder to save Checkpoints")
-#ap.add_argument("-csv", "--csv_name", required=True, help="classification csv name")
+ap.add_argument("-o","--output_folder",required=True,help="Folder to save Checkpoints")
 
 args = vars(ap.parse_args())
 model_name = args["model"]
-#args = vars(ap.parse_args())
 train_dir = args["train_dir"]
-#val_dir = args["val_dir"]
 num_classes = int(args["num_classes"])
 G = int(args["GPU"])
-#model_input_size = args["model_input_size"]
 train_batch_size = int(args["train_batch_size"])
 epochs = int(args["epochs"])
 image_size = int(args["input_size"])
-#csv_name = args["csv_name"]
 
 ############################################## Pre-processing and model_input ###############################################
 
@@ -98,16 +91,15 @@ with mirrored_strategy.scope():
     model.summary()
 
     es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=6)
-    mc_path = args['output_checkpoint_folder']
+    mc_path = args['output_folder']
     mc = ModelCheckpoint(mc_path + '/model.{epoch:02d}-{val_loss:.2f}.h5', monitor='val_loss', mode='min', verbose=1, save_best_only=True)
     mc_2 = ModelCheckpoint(mc_path +'/model_train.{epoch:02d}.h5', monitor='loss', mode='min', verbose=1, save_best_only=True)
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=3, min_lr=0.000000001)
-    tensor_board = TensorBoard(log_dir='./logs')
+    tensor_board = TensorBoard(log_dir=args['output_folder'] + '/logs')
     csv_logger = CSVLogger('training.log')
 
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics = ['accuracy'])
 
-#model = load_model('pallet_jack_17_class_squeezenet_model_9_apr.h5')
 
     model.fit(
             train_generator,
