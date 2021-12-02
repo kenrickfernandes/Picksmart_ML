@@ -1,0 +1,3 @@
+[submodule "picksmart_ml/pytorch-image-models"]
+	path = picksmart_ml/pytorch-image-models
+	url = https://github.com/rwightman/pytorch-image-models.git
